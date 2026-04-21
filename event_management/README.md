@@ -141,6 +141,6 @@ The app auto-inserts sample data on first run:
 
 ---
 
-## 👨‍💻 Author
+## 👨‍💻 Author : Vipul Ahire
 
 Built as a DBMS Project demonstrating real-world database design with Flask.
