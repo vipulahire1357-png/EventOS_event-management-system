@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% block title %}Feedback{% endblock %}
+{% block page_title %}Feedback System{% endblock %}
+{% block breadcrumb %}Home / Feedback{% endblock %}
+
+{% block content %}
+<div class="two-col">
+
+    <!-- Submit Feedback Form -->
+    <div class="card">
+        <div class="card-header">
+            <h3>💬 Submit Feedback</h3>
+        </div>
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('feedback') }}">
+                <div class="form-grid" style="grid-template-columns:1fr">
+                    <div class="form-group">
+                        <label>Participant *</label>
+                        <select name="participant_id" required>
+                            <option value="">— Select participant —</option>
+                            {% for p in participants %}
+                            <option value="{{ p.id }}">{{ p.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Event *</label>
+                        <select name="event_id" required
+                            onchange="window.location='{{ url_for('feedback') }}?event_id='+this.value">
+                            <option value="">— Select event —</option>
+                            {% for ev in events %}
+                            <option value="{{ ev.id }}" {% if selected_event_id==ev.id %}selected{% endif %}>{{ ev.name
+                                }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Rating (1–5) *</label>
+                        <div class="rating-select" style="flex-direction:row-reverse; justify-content:flex-end">
+                            {% for i in [5,4,3,2,1] %}
+                            <input type="radio" name="rating" id="star{{ i }}" value="{{ i }}" />
+                            <label for="star{{ i }}" class="star-label">★</label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Comments</label>
+                        <textarea name="comments" placeholder="Share your experience…"></textarea>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">💬 Submit Feedback</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Feedback for Selected Event -->
+    <div class="card">
+        <div class="card-header">
+            <h3>📋 Event Feedback</h3>
+            {% if selected_event %}
+            <span class="badge badge-purple">{{ selected_event.name }}</span>
+            {% endif %}
+        </div>
+        <div class="card-body">
+            {% if selected_event and all_feedback %}
+            {% set avg = (all_feedback | map(attribute='rating') | list | sum) / all_feedback|length %}
+            <div
+                style="margin-bottom:20px; padding:16px; background:var(--surface2); border-radius:var(--radius-sm); text-align:center">
+                <div style="font-family:var(--font-head); font-size:36px; font-weight:800; color:#f7b733">
+                    {{ '%.1f' | format(avg) }}
+                </div>
+                <div class="stars" style="font-size:20px">
+                    {% for i in range(avg|int) %}★{% endfor %}{% for i in range(5 - avg|int) %}☆{% endfor %}
+                </div>
+                <div style="font-size:12px; color:var(--text-muted); margin-top:4px">
+                    Based on {{ all_feedback|length }} review{{ 's' if all_feedback|length != 1 }}
+                </div>
+            </div>
+
+            <div class="feedback-list">
+                {% for f in all_feedback %}
+                <div class="feedback-card">
+                    <div class="feedback-card-top">
+                        <span class="feedback-card-name">{{ f.participant_name }}</span>
+                        <span class="stars-sm">{{ '★' * f.rating }}{{ '☆' * (5 - f.rating) }}</span>
+                    </div>
+                    <p class="feedback-card-comment">{{ f.comments or '—' }}</p>
+                </div>
+                {% endfor %}
+            </div>
+
+            {% elif selected_event %}
+            <div class="empty-state" style="padding:32px">
+                <div class="empty-icon">💬</div>
+                <h3>No feedback yet</h3>
+                <p>Be the first to submit feedback for this event!</p>
+            </div>
+            {% else %}
+            <div class="empty-state" style="padding:32px">
+                <div class="empty-icon">💬</div>
+                <h3>Select an event</h3>
+                <p>Choose an event from the form to view its feedback here.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+
+<style>
+    /* Star rating hover trick (RTL reverse) */
+    .rating-select {
+        display: flex;
+        flex-direction: row-reverse;
+        gap: 4px;
+    }
+
+    .rating-select label.star-label {
+        font-size: 32px;
+        cursor: pointer;
+        color: #2a2d3a;
+        transition: color 0.1s;
+        text-transform: none;
+        letter-spacing: 0;
+    }
+
+    .rating-select input[type="radio"]:checked~label.star-label,
+    .rating-select label.star-label:hover,
+    .rating-select label.star-label:hover~label.star-label {
+        color: #f7b733;
+    }
+</style>
+{% endblock %}

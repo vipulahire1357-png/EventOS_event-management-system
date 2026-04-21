@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}Attendance{% endblock %}
+{% block page_title %}Attendance Tracking{% endblock %}
+{% block breadcrumb %}Home / Attendance{% endblock %}
+
+{% block content %}
+
+<!-- Event Selector -->
+<div class="card" style="margin-bottom:24px">
+    <div class="card-body" style="padding:16px 24px">
+        <form method="GET" action="{{ url_for('attendance') }}"
+            style="display:flex; gap:16px; align-items:flex-end; flex-wrap:wrap">
+            <div class="form-group" style="flex:1; min-width:240px">
+                <label>Select Event to Mark Attendance</label>
+                <select name="event_id" onchange="this.form.submit()">
+                    <option value="">— Choose event —</option>
+                    {% for ev in events %}
+                    <option value="{{ ev.id }}" {% if selected_event_id==ev.id %}selected{% endif %}>
+                        {{ ev.name }} — {{ ev.date }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if selected_event %}
+<div class="card">
+    <div class="card-header">
+        <h3>✅ Attendance — {{ selected_event.name }}</h3>
+        <span class="badge badge-blue">{{ participants|length }} participant{{ 's' if participants|length != 1 }}</span>
+    </div>
+
+    {% if participants %}
+    <form method="POST" action="{{ url_for('attendance') }}">
+        <input type="hidden" name="event_id" value="{{ selected_event.id }}" />
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Mark Attendance</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in participants %}
+                    <tr>
+                        <td><strong>{{ p.name }}</strong></td>
+                        <td>{{ p.email }}</td>
+                        <td>{{ p.phone }}</td>
+                        <td>
+                            <div class="att-toggle">
+                                <input type="radio" name="status_{{ p.id }}" id="p_{{ p.id }}_present" value="Present"
+                                    {% if p.status=='Present' %}checked{% endif %} />
+                                <label for="p_{{ p.id }}_present" class="att-label att-label-present">✓ Present</label>
+
+                                <input type="radio" name="status_{{ p.id }}" id="p_{{ p.id }}_absent" value="Absent" {%
+                                    if p.status=='Absent' %}checked{% endif %} />
+                                <label for="p_{{ p.id }}_absent" class="att-label att-label-absent">✗ Absent</label>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div style="padding:18px 24px; border-top:1px solid var(--border)">
+            <button type="submit" class="btn btn-primary">💾 Save Attendance</button>
+        </div>
+    </form>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">👥</div>
+        <h3>No participants registered</h3>
+        <p>Register participants for this event first.</p>
+        <a href="{{ url_for('registration') }}" class="btn btn-primary">Register Now</a>
+    </div>
+    {% endif %}
+</div>
+
+{% elif not selected_event_id %}
+<div class="empty-state">
+    <div class="empty-icon">✅</div>
+    <h3>Select an event above</h3>
+    <p>Choose an event from the dropdown to mark attendance for its participants.</p>
+</div>
+{% endif %}
+
+{% endblock %}

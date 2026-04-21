@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Schedule{% endblock %}
+{% block page_title %}Schedule Management{% endblock %}
+{% block breadcrumb %}Home / Schedule{% endblock %}
+
+{% block content %}
+<div class="two-col">
+
+    <!-- Left: Add Session + Select Event -->
+    <div style="display:flex; flex-direction:column; gap:20px">
+
+        <!-- Select Event -->
+        <div class="card">
+            <div class="card-header">
+                <h3>📅 Select Event</h3>
+            </div>
+            <div class="card-body">
+                <form method="GET" action="{{ url_for('schedule') }}">
+                    <div class="form-group">
+                        <label>Event</label>
+                        <select name="event_id" onchange="this.form.submit()">
+                            <option value="">— Choose event —</option>
+                            {% for ev in events %}
+                            <option value="{{ ev.id }}" {% if selected_event_id==ev.id %}selected{% endif %}>
+                                {{ ev.name }} — {{ ev.date }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Add Session form (only if event selected) -->
+        {% if selected_event %}
+        <div class="card">
+            <div class="card-header">
+                <h3>➕ Add Session to "{{ selected_event.name }}"</h3>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('add_schedule') }}">
+                    <input type="hidden" name="event_id" value="{{ selected_event.id }}" />
+                    <div class="form-grid" style="grid-template-columns:1fr">
+                        <div class="form-group">
+                            <label>Session Name *</label>
+                            <input type="text" name="session_name" placeholder="e.g. Opening Keynote" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Session Time *</label>
+                            <input type="text" name="session_time" placeholder="e.g. 09:00 AM" required />
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">➕ Add Session</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+
+    <!-- Right: Timeline -->
+    <div class="card">
+        <div class="card-header">
+            <h3>🕐 Event Timeline</h3>
+            {% if selected_event %}<span class="badge badge-purple">{{ selected_event.name }}</span>{% endif %}
+        </div>
+        <div class="card-body">
+            {% if selected_event %}
+            {% if sessions %}
+            <div class="timeline">
+                {% for s in sessions %}
+                <div class="timeline-item">
+                    <div class="timeline-time">{{ s.session_time }}</div>
+                    <div class="timeline-name">{{ s.session_name }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state" style="padding:24px">
+                <div class="empty-icon">📅</div>
+                <h3>No sessions yet</h3>
+                <p>Add sessions using the form on the left.</p>
+            </div>
+            {% endif %}
+            {% else %}
+            <div class="empty-state" style="padding:40px">
+                <div class="empty-icon">📅</div>
+                <h3>Select an event</h3>
+                <p>Choose an event from the dropdown to view and manage its schedule.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

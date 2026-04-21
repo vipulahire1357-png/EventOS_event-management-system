@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+{% block title %}Reports{% endblock %}
+{% block page_title %}Reports{% endblock %}
+{% block breadcrumb %}Home / Reports{% endblock %}
+
+{% block content %}
+
+<!-- Event Selector -->
+<div class="card" style="margin-bottom:24px">
+    <div class="card-body" style="padding:16px 24px">
+        <form method="GET" action="{{ url_for('reports') }}"
+            style="display:flex; gap:16px; align-items:flex-end; flex-wrap:wrap">
+            <div class="form-group" style="flex:1; min-width:260px">
+                <label>Generate Report for Event</label>
+                <select name="event_id" onchange="this.form.submit()">
+                    <option value="">— Choose event —</option>
+                    {% for ev in events %}
+                    <option value="{{ ev.id }}" {% if selected_event_id==ev.id %}selected{% endif %}>
+                        {{ ev.name }} — {{ ev.date }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if report_data and selected_event %}
+
+<!-- Summary Stats -->
+<div class="stats-grid" style="margin-bottom:28px">
+    <div class="stat-card c1">
+        <div class="stat-icon">👥</div>
+        <div class="stat-number">{{ report_data.total }}</div>
+        <div class="stat-label">Total Registered</div>
+    </div>
+    <div class="stat-card c3">
+        <div class="stat-icon">✅</div>
+        <div class="stat-number">{{ report_data.present }}</div>
+        <div class="stat-label">Present</div>
+    </div>
+    <div class="stat-card c2">
+        <div class="stat-icon">❌</div>
+        <div class="stat-number">{{ report_data.absent }}</div>
+        <div class="stat-label">Absent</div>
+    </div>
+    <div class="stat-card c4">
+        <div class="stat-icon">💬</div>
+        <div class="stat-number">{{ report_data.feedback_rows|length }}</div>
+        <div class="stat-label">Feedback Received</div>
+    </div>
+    <div class="stat-card c5">
+        <div class="stat-icon">⭐</div>
+        <div class="stat-number">{{ report_data.avg_rating or '—' }}</div>
+        <div class="stat-label">Avg Rating</div>
+    </div>
+</div>
+
+{% if report_data.total > 0 %}
+<div style="margin-bottom:28px">
+    <div
+        style="display:flex; justify-content:space-between; font-size:12px; color:var(--text-muted); margin-bottom:6px">
+        <span>Attendance Rate</span>
+        <span>{{ ((report_data.present / report_data.total) * 100)|round(1) }}%</span>
+    </div>
+    <div class="progress">
+        <div class="progress-bar" style="width:{{ ((report_data.present / report_data.total) * 100)|round(1) }}%"></div>
+    </div>
+</div>
+{% endif %}
+
+<div class="two-col">
+
+    <!-- Attendance Table -->
+    <div class="card">
+        <div class="card-header">
+            <h3>✅ Attendance Report — {{ selected_event.name }}</h3>
+            <span class="badge badge-blue">{{ report_data.total }} total</span>
+        </div>
+        {% if report_data.att_rows %}
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in report_data.att_rows %}
+                    <tr>
+                        <td><strong>{{ row.name }}</strong></td>
+                        <td>{{ row.email }}</td>
+                        <td>
+                            {% if row.status == 'Present' %}
+                            <span class="badge badge-green">✓ Present</span>
+                            {% elif row.status == 'Absent' %}
+                            <span class="badge badge-red">✗ Absent</span>
+                            {% else %}
+                            <span class="badge badge-grey">— Not Marked</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state" style="padding:32px">
+            <div class="empty-icon">✅</div>
+            <h3>No attendance data</h3>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Feedback Report -->
+    <div class="card">
+        <div class="card-header">
+            <h3>💬 Feedback Report</h3>
+            {% if report_data.avg_rating %}
+            <span class="badge badge-yellow">⭐ Avg: {{ report_data.avg_rating }}</span>
+            {% endif %}
+        </div>
+        {% if report_data.feedback_rows %}
+        <div class="card-body">
+            <div class="feedback-list">
+                {% for f in report_data.feedback_rows %}
+                <div class="feedback-card">
+                    <div class="feedback-card-top">
+                        <span class="feedback-card-name">{{ f.participant_name }}</span>
+                        <span class="stars-sm">{{ '★' * f.rating }}{{ '☆' * (5 - f.rating) }}</span>
+                    </div>
+                    <p class="feedback-card-comment">{{ f.comments or '—' }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% else %}
+        <div class="empty-state" style="padding:32px">
+            <div class="empty-icon">💬</div>
+            <h3>No feedback yet</h3>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+
+{% elif not selected_event_id %}
+<div class="empty-state">
+    <div class="empty-icon">📈</div>
+    <h3>Generate a Report</h3>
+    <p>Select an event from the dropdown above to see its attendance and feedback report.</p>
+</div>
+{% endif %}
+
+<!-- All Events Summary -->
+<div class="card" style="margin-top:28px">
+    <div class="card-header">
+        <h3>📊 All Events — Summary</h3>
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Event</th>
+                    <th>Date</th>
+                    <th>Location</th>
+                    <th>Registered</th>
+                    <th>Avg Rating</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ev in events %}
+                <tr>
+                    <td><strong>{{ ev.name }}</strong></td>
+                    <td>{{ ev.date }}</td>
+                    <td>{{ ev.location }}</td>
+                    <td><span class="badge badge-purple">{{ ev.participant_count }}</span></td>
+                    <td>
+                        {% if ev.avg_rating %}
+                        <span class="stars-sm">⭐</span> {{ ev.avg_rating }}
+                        {% else %}
+                        <span style="color:var(--text-muted)">—</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{{ url_for('reports') }}?event_id={{ ev.id }}"
+                            class="btn btn-secondary btn-sm">Report</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

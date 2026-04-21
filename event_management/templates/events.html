@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Events{% endblock %}
+{% block page_title %}Events{% endblock %}
+{% block breadcrumb %}Home / Events{% endblock %}
+
+{% block topbar_actions %}
+<a href="{{ url_for('add_event') }}" class="btn btn-primary">＋ New Event</a>
+{% endblock %}
+
+{% block content %}
+
+<!-- Filter Bar -->
+<div class="filter-bar">
+    <div class="form-group" style="flex:0 0 220px">
+        <label>Filter by Date</label>
+        <input type="date" id="dateFilter" value="{{ date_filter }}"
+            onchange="window.location='{{ url_for('events') }}?date='+this.value" />
+    </div>
+    {% if date_filter %}
+    <a href="{{ url_for('events') }}" class="btn btn-secondary" style="margin-top:22px">✕ Clear</a>
+    {% endif %}
+    <div style="margin-left:auto; margin-top:22px; color:var(--text-muted); font-size:13px">
+        {{ events|length }} event{{ 's' if events|length != 1 }} found
+    </div>
+</div>
+
+{% if events %}
+<div class="events-grid">
+    {% for ev in events %}
+    <a href="{{ url_for('event_detail', event_id=ev.id) }}" class="event-card">
+        <div class="event-card-date">📅 {{ ev.date }}</div>
+        <h3>{{ ev.name }}</h3>
+        <p>{{ ev.description or 'No description provided.' }}</p>
+        <div class="event-card-meta">
+            <span>🕐 {{ ev.time }}</span>
+            <span>📍 {{ ev.location }}</span>
+            <span>👥 {{ ev.participant_count }} registered</span>
+            {% if ev.avg_rating %}
+            <span>⭐ {{ ev.avg_rating }}</span>
+            {% endif %}
+        </div>
+    </a>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <div class="empty-icon">🎉</div>
+    <h3>No events found</h3>
+    <p>{% if date_filter %}No events on that date.{% else %}Get started by adding your first event.{% endif %}</p>
+    <a href="{{ url_for('add_event') }}" class="btn btn-primary">Add Event</a>
+</div>
+{% endif %}
+
+{% endblock %}

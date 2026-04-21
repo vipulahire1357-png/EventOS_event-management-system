@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Participants{% endblock %}
+{% block page_title %}Participants{% endblock %}
+{% block breadcrumb %}Home / Participants{% endblock %}
+
+{% block topbar_actions %}
+<a href="{{ url_for('add_participant') }}" class="btn btn-primary">＋ Add Participant</a>
+{% endblock %}
+
+{% block content %}
+
+<div class="card">
+    <div class="card-header">
+        <h3>👥 All Participants ({{ participants|length }})</h3>
+    </div>
+    {% if participants %}
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Events</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in participants %}
+                <tr>
+                    <td>{{ p.id }}</td>
+                    <td><strong>{{ p.name }}</strong></td>
+                    <td>{{ p.email }}</td>
+                    <td>{{ p.phone }}</td>
+                    <td>
+                        <span class="badge badge-purple">{{ p.event_count }} event{{ 's' if p.event_count != 1 }}</span>
+                    </td>
+                    <td>
+                        <a href="{{ url_for('registration') }}" class="btn btn-secondary btn-sm">Register</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">👥</div>
+        <h3>No participants yet</h3>
+        <p>Add your first participant to get started.</p>
+        <a href="{{ url_for('add_participant') }}" class="btn btn-primary">Add Participant</a>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

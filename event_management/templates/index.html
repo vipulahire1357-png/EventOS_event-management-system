@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block breadcrumb %}Home / Dashboard{% endblock %}
+
+{% block topbar_actions %}
+<a href="{{ url_for('add_event') }}" class="btn btn-primary">＋ Add Event</a>
+{% endblock %}
+
+{% block content %}
+
+<!-- Stats Row -->
+<div class="stats-grid">
+    <div class="stat-card c1">
+        <div class="stat-icon">🎉</div>
+        <div class="stat-number">{{ stats.total_events }}</div>
+        <div class="stat-label">Total Events</div>
+    </div>
+    <div class="stat-card c2">
+        <div class="stat-icon">👥</div>
+        <div class="stat-number">{{ stats.total_participants }}</div>
+        <div class="stat-label">Participants</div>
+    </div>
+    <div class="stat-card c3">
+        <div class="stat-icon">📝</div>
+        <div class="stat-number">{{ stats.total_registrations }}</div>
+        <div class="stat-label">Registrations</div>
+    </div>
+    <div class="stat-card c4">
+        <div class="stat-icon">✅</div>
+        <div class="stat-number">{{ stats.present_count }}</div>
+        <div class="stat-label">Attendees</div>
+    </div>
+    <div class="stat-card c5">
+        <div class="stat-icon">⭐</div>
+        <div class="stat-number">{{ stats.avg_rating or '—' }}</div>
+        <div class="stat-label">Avg Rating</div>
+    </div>
+</div>
+
+<!-- Two columns -->
+<div class="two-col">
+
+    <!-- Recent Events -->
+    <div class="card">
+        <div class="card-header">
+            <h3>🗓 Recent Events</h3>
+            <a href="{{ url_for('events') }}" class="btn btn-secondary btn-sm">View All</a>
+        </div>
+        <div>
+            {% if stats.recent_events %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Event</th>
+                        <th>Date</th>
+                        <th>Location</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ev in stats.recent_events %}
+                    <tr>
+                        <td><strong>{{ ev.name }}</strong></td>
+                        <td>{{ ev.date }}</td>
+                        <td>{{ ev.location }}</td>
+                        <td>
+                            <a href="{{ url_for('event_detail', event_id=ev.id) }}"
+                                class="btn btn-secondary btn-sm">View</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">🎉</div>
+                <h3>No events yet</h3>
+                <p>Create your first event to get started.</p>
+                <a href="{{ url_for('add_event') }}" class="btn btn-primary">Add Event</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Top Rated Events -->
+    <div class="card">
+        <div class="card-header">
+            <h3>🏆 Top Rated Events</h3>
+        </div>
+        <div class="card-body">
+            {% if stats.top_events %}
+            {% for ev in stats.top_events %}
+            <div class="top-event">
+                <div class="top-event-rank">#{{ loop.index }}</div>
+                <div class="top-event-info">
+                    <strong>{{ ev.name }}</strong>
+                    <small>{{ ev.cnt }} review{{ 's' if ev.cnt != 1 }}</small>
+                </div>
+                <div class="top-event-rating">{{ ev.avg_r }}★</div>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">⭐</div>
+                <h3>No feedback yet</h3>
+                <p>Ratings will appear here once participants submit feedback.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+
+<!-- Quick Actions -->
+<div class="card" style="margin-top:24px">
+    <div class="card-header">
+        <h3>⚡ Quick Actions</h3>
+    </div>
+    <div class="card-body" style="display:flex; gap:12px; flex-wrap:wrap;">
+        <a href="{{ url_for('add_event') }}" class="btn btn-primary">🎉 New Event</a>
+        <a href="{{ url_for('add_participant') }}" class="btn btn-secondary">👤 New Participant</a>
+        <a href="{{ url_for('registration') }}" class="btn btn-secondary">📝 Register Someone</a>
+        <a href="{{ url_for('attendance') }}" class="btn btn-secondary">✅ Mark Attendance</a>
+        <a href="{{ url_for('feedback') }}" class="btn btn-secondary">💬 View Feedback</a>
+        <a href="{{ url_for('reports') }}" class="btn btn-secondary">📈 Reports</a>
+    </div>
+</div>
+
+{% endblock %}

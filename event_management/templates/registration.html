@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Registration{% endblock %}
+{% block page_title %}Event Registration{% endblock %}
+{% block breadcrumb %}Home / Registration{% endblock %}
+
+{% block content %}
+<div class="two-col">
+
+    <!-- Registration Form -->
+    <div class="card">
+        <div class="card-header">
+            <h3>📝 Register Participant for Event</h3>
+        </div>
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('registration') }}">
+                <div class="form-grid" style="grid-template-columns:1fr">
+                    <div class="form-group">
+                        <label>Select Participant *</label>
+                        <select name="participant_id" required>
+                            <option value="">— Choose participant —</option>
+                            {% for p in participants %}
+                            <option value="{{ p.id }}">{{ p.name }} ({{ p.email }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Select Event *</label>
+                        <select name="event_id" required>
+                            <option value="">— Choose event —</option>
+                            {% for ev in events %}
+                            <option value="{{ ev.id }}">{{ ev.name }} — {{ ev.date }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">📝 Register</button>
+                </div>
+            </form>
+
+            <div style="margin-top:20px; padding-top:16px; border-top:1px solid var(--border)">
+                <p style="font-size:12.5px; color:var(--text-muted)">
+                    💡 Duplicate registrations are automatically prevented.<br>
+                    Need a new participant? <a href="{{ url_for('add_participant') }}" style="color:var(--accent)">Add
+                        one here</a>.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Registrations -->
+    <div class="card">
+        <div class="card-header">
+            <h3>🕐 Recent Registrations</h3>
+        </div>
+        {% if recent_regs %}
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Participant</th>
+                        <th>Event</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in recent_regs %}
+                    <tr>
+                        <td>{{ r.id }}</td>
+                        <td><strong>{{ r.pname }}</strong></td>
+                        <td>{{ r.ename }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state" style="padding:32px">
+            <div class="empty-icon">📝</div>
+            <h3>No registrations yet</h3>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

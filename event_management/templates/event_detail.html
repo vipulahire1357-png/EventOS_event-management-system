@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% block title %}{{ event.name }}{% endblock %}
+{% block page_title %}{{ event.name }}{% endblock %}
+{% block breadcrumb %}Home / Events / {{ event.name }}{% endblock %}
+
+{% block topbar_actions %}
+<a href="{{ url_for('events') }}" class="btn btn-secondary">← Events</a>
+<a href="{{ url_for('attendance') }}?event_id={{ event.id }}" class="btn btn-primary">✅ Mark Attendance</a>
+{% endblock %}
+
+{% block content %}
+
+<!-- Event Meta -->
+<div class="card" style="margin-bottom:24px">
+    <div class="card-body" style="display:flex; gap:32px; flex-wrap:wrap; align-items:center">
+        <div>
+            <span class="badge badge-purple" style="font-size:13px; padding:5px 14px">🎉 {{ event.name }}</span>
+        </div>
+        <div style="display:flex; gap:24px; flex-wrap:wrap; font-size:13.5px; color:var(--text-muted)">
+            <span>📅 <strong style="color:var(--text)">{{ event.date }}</strong></span>
+            <span>🕐 <strong style="color:var(--text)">{{ event.time }}</strong></span>
+            <span>📍 <strong style="color:var(--text)">{{ event.location }}</strong></span>
+            <span>👥 <strong style="color:var(--text)">{{ participants|length }}</strong> registered</span>
+            {% if avg_rating %}
+            <span>⭐ <strong style="color:#f7b733">{{ avg_rating }} / 5</strong></span>
+            {% endif %}
+        </div>
+    </div>
+    {% if event.description %}
+    <div style="padding:0 24px 18px; font-size:14px; color:var(--text-muted)">{{ event.description }}</div>
+    {% endif %}
+</div>
+
+<div class="two-col">
+
+    <!-- Participants -->
+    <div class="card">
+        <div class="card-header">
+            <h3>👥 Registered Participants ({{ participants|length }})</h3>
+            <a href="{{ url_for('registration') }}" class="btn btn-secondary btn-sm">+ Register</a>
+        </div>
+        {% if participants %}
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Attendance</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in participants %}
+                    <tr>
+                        <td><strong>{{ p.name }}</strong></td>
+                        <td>{{ p.email }}</td>
+                        <td>
+                            {% if p.status == 'Present' %}
+                            <span class="badge badge-green">✓ Present</span>
+                            {% elif p.status == 'Absent' %}
+                            <span class="badge badge-red">✗ Absent</span>
+                            {% else %}
+                            <span class="badge badge-grey">— Not Marked</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state" style="padding:32px">
+            <div class="empty-icon">👥</div>
+            <h3>No participants yet</h3>
+            <a href="{{ url_for('registration') }}" class="btn btn-primary">Register Participant</a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Schedule Timeline -->
+    <div class="card">
+        <div class="card-header">
+            <h3>📅 Schedule</h3>
+            <a href="{{ url_for('schedule') }}?event_id={{ event.id }}" class="btn btn-secondary btn-sm">Manage</a>
+        </div>
+        <div class="card-body">
+            {% if schedule %}
+            <div class="timeline">
+                {% for s in schedule %}
+                <div class="timeline-item">
+                    <div class="timeline-time">{{ s.session_time }}</div>
+                    <div class="timeline-name">{{ s.session_name }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state" style="padding:24px">
+                <div class="empty-icon">📅</div>
+                <h3>No sessions scheduled</h3>
+                <a href="{{ url_for('schedule') }}?event_id={{ event.id }}" class="btn btn-primary">Add Sessions</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+
+<!-- Feedback Section -->
+<div class="card" style="margin-top:24px">
+    <div class="card-header">
+        <h3>💬 Feedback ({{ feedback|length }})</h3>
+        <a href="{{ url_for('feedback') }}?event_id={{ event.id }}" class="btn btn-secondary btn-sm">Submit Feedback</a>
+    </div>
+    <div class="card-body">
+        {% if feedback %}
+        <div class="feedback-list">
+            {% for f in feedback %}
+            <div class="feedback-card">
+                <div class="feedback-card-top">
+                    <span class="feedback-card-name">{{ f.participant_name }}</span>
+                    <span class="stars">{{ '★' * f.rating }}{{ '☆' * (5 - f.rating) }}</span>
+                </div>
+                <p class="feedback-card-comment">{{ f.comments or 'No comments.' }}</p>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state" style="padding:24px">
+            <div class="empty-icon">💬</div>
+            <h3>No feedback yet</h3>
+            <a href="{{ url_for('feedback') }}?event_id={{ event.id }}" class="btn btn-primary">Submit Feedback</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

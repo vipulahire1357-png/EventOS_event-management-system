@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}EventOS{% endblock %} — Event Management System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+
+<body>
+
+    <!-- ── SIDEBAR ── -->
+    <nav class="sidebar">
+        <div class="sidebar-logo">
+            <div class="logo-icon">🎯</div>
+            <h2>EventOS</h2>
+            <p>Management System</p>
+        </div>
+
+        <span class="nav-section-label">Main</span>
+        <a href="{{ url_for('index') }}" class="nav-link {% if request.endpoint=='index' %}active{% endif %}">
+            <span class="nav-icon">📊</span> Dashboard
+        </a>
+        <a href="{{ url_for('events') }}"
+            class="nav-link {% if request.endpoint in ['events', 'event_detail'] %}active{% endif %}">
+            <span class="nav-icon">🎉</span> Events
+        </a>
+
+        <span class="nav-section-label" style="margin-top:12px">People</span>
+        <a href="{{ url_for('participants') }}"
+            class="nav-link {% if 'participant' in request.endpoint %}active{% endif %}">
+            <span class="nav-icon">👥</span> Participants
+        </a>
+        <a href="{{ url_for('registration') }}"
+            class="nav-link {% if request.endpoint=='registration' %}active{% endif %}">
+            <span class="nav-icon">📝</span> Registration
+        </a>
+
+        <span class="nav-section-label" style="margin-top:12px">Operations</span>
+        <a href="{{ url_for('schedule') }}" class="nav-link {% if request.endpoint=='schedule' %}active{% endif %}">
+            <span class="nav-icon">📅</span> Schedule
+        </a>
+        <a href="{{ url_for('attendance') }}" class="nav-link {% if request.endpoint=='attendance' %}active{% endif %}">
+            <span class="nav-icon">✅</span> Attendance
+        </a>
+        <a href="{{ url_for('feedback') }}" class="nav-link {% if request.endpoint=='feedback' %}active{% endif %}">
+            <span class="nav-icon">💬</span> Feedback
+        </a>
+        <a href="{{ url_for('reports') }}" class="nav-link {% if request.endpoint=='reports' %}active{% endif %}">
+            <span class="nav-icon">📈</span> Reports
+        </a>
+
+        <div class="sidebar-footer">
+            <p>EventOS v1.0<br>DBMS Project · SQLite + Flask</p>
+        </div>
+    </nav>
+
+    <!-- ── MAIN ── -->
+    <div class="main">
+        <div class="topbar">
+            <div>
+                <h1>{% block page_title %}Dashboard{% endblock %}</h1>
+                <p class="breadcrumb">{% block breadcrumb %}Home{% endblock %}</p>
+            </div>
+            <div class="topbar-actions">
+                {% block topbar_actions %}{% endblock %}
+            </div>
+        </div>
+
+        <div class="content">
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            <div class="flash-container">
+                {% for cat, msg in messages %}
+                <div class="flash {{ cat }}">
+                    {% if cat == 'success' %}✅{% else %}⚠️{% endif %} {{ msg }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% endwith %}
+
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+
+    <script>
+        // Auto-dismiss flashes
+        setTimeout(() => {
+            document.querySelectorAll('.flash').forEach(el => {
+                el.style.transition = 'opacity 0.5s';
+                el.style.opacity = '0';
+                setTimeout(() => el.remove(), 500);
+            });
+        }, 4000);
+    </script>
+</body>
+
+</html>
